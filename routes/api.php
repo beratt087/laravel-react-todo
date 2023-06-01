@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\TodosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('web')->group(function () {
+    Route::prefix('/user')->group(function () {
+        Route::post('/create', [RegisterController::class, 'store']);
+        Route::post('/auth', [LoginController::class, 'login']);
+    });
+
+    Route::prefix('/todo')->group(function () {
+        Route::post('/create', [TodosController::class, 'store']);
+        Route::get('/get', [TodosController::class, 'fetch']);
+        Route::put('/update', [TodosController::class, 'update']);
+        Route::put('/destroy', [TodosController::class, 'destroy']);
+    });
+
 });
+
+
+
+
+

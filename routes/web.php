@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\TodosController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +16,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware('auth')->group(function () {
+    Route::get('/', [TodosController::class, 'create']);
 });
+
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [RegisterController::class, 'create']);
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+});
+
