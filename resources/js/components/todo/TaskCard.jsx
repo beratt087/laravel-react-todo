@@ -6,8 +6,14 @@ import {
 } from "react-icons/fc";
 import { BiTrash } from "react-icons/bi";
 
+import { useState, useEffect, useRef } from "react";
+
 export default function TaskCard(props) {
-    const { data, finishTask, destroyTask } = props;
+    const [isEditing, setIsEditing] = useState(false);
+    const inputRef = useRef(null);
+
+    const { data, finishTask, destroyTask, editTask } = props;
+    const [editedTaskName, setEditedTaskName] = useState(data?.task ?? "");
     const date = new Date(data?.created_at);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}-${(
         date.getMonth() + 1
@@ -19,11 +25,58 @@ export default function TaskCard(props) {
         .toString()
         .padStart(2, "0")}`;
 
+    useEffect(() => {
+        if (isEditing) {
+            inputRef.current.focus();
+        }
+    }, [isEditing]);
+
+    const handleClickOutside = (e) => {
+        if (inputRef.current && !inputRef.current.contains(e.target)) {
+            setEditedTaskName(data?.task ?? "");
+            setIsEditing(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="max-w-sm pr-4 pt-12 pb-4 bg-white border border-gray-200 rounded-lg shadow relative">
-            <h5 className="mb-2 text-xl px-6 font-bold tracking-tight text-gray-900 break-words">
-                {data?.task ?? "??"}
-            </h5>
+            {!isEditing ? (
+                <h5
+                    className="mb-2 text-xl px-6 font-bold tracking-tight text-gray-900 break-words"
+                    onClick={() => setIsEditing(true)}
+                >
+                    {data?.task ?? "??"}
+                </h5>
+            ) : (
+                <input
+                    type="text"
+                    id="task"
+                    name="task"
+                    ref={inputRef}
+                    className="block px-2.5 py-2.5 w-[90%] mx-auto text-gray-900 bg-transparent rounded-lg border border-blue-400 appearance-none focus:ring-0 focus:border-blue-600 peer"
+                    placeholder=" "
+                    value={editedTaskName}
+                    onChange={(e) => setEditedTaskName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            setIsEditing(false);
+                            editTask(data?.id, editedTaskName);
+                        } else if (e.key === "Escape") {
+                            setEditedTaskName(data?.task ?? "");
+                            setIsEditing(false);
+                        }
+                    }}
+                    autoFocus={true}
+                />
+            )}
             <p className="mb-3 font-normal text-sm text-gray-700 absolute top-2 right-10">
                 {formattedDate ?? "??"}
             </p>

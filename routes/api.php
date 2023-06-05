@@ -28,6 +28,7 @@ Route::middleware('web')->group(function () {
         Route::get('/get', [TodosController::class, 'fetch']);
         Route::put('/update', [TodosController::class, 'update']);
         Route::put('/destroy', [TodosController::class, 'destroy']);
+        Route::put('/edit', [TodosController::class, 'edit']);
     });
 
 });

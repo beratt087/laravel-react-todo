@@ -19,6 +19,35 @@ export default function Todo() {
         setTasks(response.data?.data);
     };
 
+    const editTask = async (id, task) => {
+        try {
+            const response = await axios.put(
+                "/api/todo/edit",
+                {
+                    id,
+                    task,
+                },
+                {
+                    headers: {
+                        "X-CSRF-TOKEN": window.csrfToken,
+                    },
+                }
+            );
+
+            if (response?.data?.status === "error") {
+                return toast.error(
+                    response.data?.message ?? "An unknown error occurred."
+                );
+            }
+
+            return getTasks().then((r) =>
+                toast.success(response?.data?.message)
+            );
+        } catch (error) {
+            return toast.error(error.response.data.message);
+        }
+    };
+
     useEffect(() => {
         getTasks()
             .then((r) => console.log("Tasks fetched successfully.", r))
@@ -74,6 +103,9 @@ export default function Todo() {
             );
 
             if (response?.data?.status === "error") {
+                if (response?.data?.fields) {
+                    return toast.error(response.data.fields);
+                }
                 return toast.error(
                     response.data?.message ?? "An unknown error occurred."
                 );
@@ -167,6 +199,17 @@ export default function Todo() {
                     </div>
                 </form>
             </div>
+            <div className="w-full px-12 mx-auto flex flex-col gap-y-4">
+                <div
+                    className="p-4 mb-4 text-lg text-blue-800 rounded-lg bg-blue-50"
+                    role="alert"
+                >
+                    <p className="font-semibold">Info!</p> You can edit the task
+                    by double clicking the task name. <br />
+                    You can update the editing process by "Enter", you can
+                    cancel it by "Esc"
+                </div>
+            </div>
             <div className="w-full h-[1px] bg-gray-300"></div>
             <div className="grid w-full px-10 grid-cols-3 gap-12">
                 {tasks.length > 0 ? (
@@ -176,6 +219,7 @@ export default function Todo() {
                             data={_}
                             finishTask={finishTask}
                             destroyTask={destroyTask}
+                            editTask={editTask}
                         />
                     ))
                 ) : (

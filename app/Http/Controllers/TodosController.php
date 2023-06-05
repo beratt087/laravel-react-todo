@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DestroyTodosRequest;
+use App\Http\Requests\EditTodosRequest;
 use App\Http\Requests\StoreTodosRequest;
 use App\Http\Requests\UpdateTodosRequest;
 use App\Models\Todos;
@@ -129,6 +130,37 @@ class TodosController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Task successfully deleted.'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Task not found.'
+                ]);
+            }
+
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function edit(EditTodosRequest $request)
+    {
+        try {
+            $task = Todos::where('created_by', Auth::id())
+                ->where('id', $request->id)
+                ->first();
+
+            if ($task) {
+                $task->task = $request->task;
+                $task->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Task successfully edited.'
                 ]);
             } else {
                 return response()->json([
